@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Collections;
 
 public class CleanupFiringSystem : JobComponentSystem
 {
@@ -17,7 +17,7 @@ public class CleanupFiringSystem : JobComponentSystem
     {
         public EntityCommandBuffer.Concurrent CommandBuffer;
         public float CurrentTime;
-        public void Execute(Entity entity, int index, ref Firing weapon)
+        public void Execute(Entity entity, int index,[ReadOnly] ref Firing weapon)
         {
             if (CurrentTime - weapon.FireAt < 0.5f) return;
             CommandBuffer.RemoveComponent<Firing>(index, entity);

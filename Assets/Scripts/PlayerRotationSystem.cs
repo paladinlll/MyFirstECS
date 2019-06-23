@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Unity.Entities;
+using Unity.Transforms;
 
 public class PlayerRotationSystem : ComponentSystem
 {
@@ -11,11 +12,11 @@ public class PlayerRotationSystem : ComponentSystem
         var deltaTime = Time.deltaTime;
         if (Physics.Raycast(cameraRay, out var hit, 100, layerMask))
         {
-            Entities.ForEach((Entity entity, Transform transform, RotationCompnent rotationCompnent) =>
+            Entities.ForEach((Entity entity, Transform transform, ref Rotation rotation) =>
             {
                 var forward = hit.point - transform.position;
-                var rotation = Quaternion.LookRotation(forward);
-                rotationCompnent.Value = new Quaternion(0, rotation.y, 0, rotation.w).normalized;
+                var lookAt = Quaternion.LookRotation(forward);
+                rotation.Value = new Quaternion(0, lookAt.y, 0, lookAt.w).normalized;
             });
         }
     }

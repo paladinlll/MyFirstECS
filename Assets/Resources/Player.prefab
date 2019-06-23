@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 550810752}
   - component: {fileID: 550810753}
   - component: {fileID: 5414705725048161325}
+  - component: {fileID: 995339440644798661}
+  - component: {fileID: 550810754}
   m_Layer: 0
   m_Name: Bullet Spawn
   m_TagString: Untagged
@@ -69,6 +71,59 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d8133af023214ae993fc28d2fd97a1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &995339440644798661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 550810750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6851b6711fc654d54b6566c5eae03737, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedData:
+    Value:
+      c0:
+        x: 1
+        y: 0
+        z: 0
+        w: 0
+      c1:
+        x: 0
+        y: 1
+        z: 0
+        w: 0
+      c2:
+        x: 0
+        y: 0
+        z: 1
+        w: 0
+      c3:
+        x: 0.64
+        y: 0.03
+        z: 0.93
+        w: 1
+--- !u!114 &550810754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 550810750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 345a91954f2ba4779ae83b4fcf75bef6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedData:
+    Value:
+      value:
+        x: 0
+        y: 0
+        z: 0
+        w: 1
 --- !u!1 &1162244638
 GameObject:
   m_ObjectHideFlags: 0
@@ -266,7 +321,7 @@ GameObject:
   - component: {fileID: 5314812057278869209}
   - component: {fileID: 6090648099636821385}
   - component: {fileID: 6090648099636821386}
-  - component: {fileID: 6346893521924328360}
+  - component: {fileID: 369091613}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -392,7 +447,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &6346893521924328360
+--- !u!114 &369091613
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -401,7 +456,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 6090648099636821384}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2edaf7b8c7a2174db9488a6cdafd4ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 345a91954f2ba4779ae83b4fcf75bef6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Value: {x: 0, y: 0, z: 0, w: 1}
+  m_SerializedData:
+    Value:
+      value:
+        x: 0
+        y: 0
+        z: 0
+        w: 1

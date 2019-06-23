@@ -1,16 +1,15 @@
-﻿using UnityEngine;
-using System.Collections;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Transforms;
+using UnityEngine;
+using Unity.Collections;
 
 public class RotationSystem : ComponentSystem
 {
     protected override void OnUpdate()
     {
-        Entities.ForEach((Entity entity, Rigidbody rigidbody, RotationCompnent rotationCompnent) =>
+        Entities.ForEach((Entity entity, Rigidbody rigidbody, ref  Rotation rotation) =>
         {
-            var rotation = rotationCompnent.Value;
-            rigidbody.MoveRotation(rotation);
+            rigidbody.MoveRotation(rotation.Value);
         });
     }
 }

@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class PlayerMovementSystem : ComponentSystem
 {
+    //[Inject] HexTileHightlightComponent hexTileHightlightComponent;
+
     protected override void OnUpdate()
     {
         var deltaTime = Time.deltaTime;

@@ -330,6 +330,13 @@ MonoBehaviour:
     layer: 0
     castShadows: 0
     receiveShadows: 0
+  _hexTerrain:
+    mesh: {fileID: 0}
+    material: {fileID: 2100000, guid: 0ceb05d8b664c584884e876386b15f70, type: 2}
+    subMesh: 0
+    layer: 0
+    castShadows: 0
+    receiveShadows: 0
   _defaultMaterial: {fileID: 2100000, guid: dd7af49cab6fdd043867db709c8e6367, type: 2}
   _yellowMaterial: {fileID: 2100000, guid: 0ceb05d8b664c584884e876386b15f70, type: 2}
 --- !u!4 &966402012

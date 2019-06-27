@@ -43,10 +43,16 @@ namespace Unity.Physics.Extensions
             //{
             //    return;
             //}
-            if ((Camera.main != null))
+            Entities.ForEach((Entity entity, ref Translation translation, ref HexTileComponent hexTileComponent) =>
+            {
+
+            });
+
+            var camera = Camera.main;
+            if (camera != null)
             {
                 var mousePosition = Input.mousePosition;
-                var cameraRay = Camera.main.ScreenPointToRay(mousePosition);
+                var cameraRay = camera.ScreenPointToRay(mousePosition);
                 var rayInput = new RaycastInput
                 {
                     Start = cameraRay.origin,
@@ -55,21 +61,15 @@ namespace Unity.Physics.Extensions
                 };
                 var CollisionWorld = m_BuildPhysicsWorldSystem.PhysicsWorld.CollisionWorld;
 
+                Entities.WithAll<HexTileHightlightComponent>().ForEach((Entity entity) =>
+                {
+                    PostUpdateCommands.RemoveComponent<HexTileHightlightComponent>(entity);
+                });
                 if (CollisionWorld.CastRay(rayInput, out var closestHit))
                 {
                     RigidBody hitBody = CollisionWorld.Bodies[closestHit.RigidBodyIndex];
                     HexTileComponent hitTile = EntityManager.GetComponentData<HexTileComponent>(hitBody.Entity);
-                    Entities.ForEach((Entity entity, ref HexTileHightlightComponent hightlight) =>
-                    {
-                        Translation hitTranslation = EntityManager.GetComponentData<Translation>(hitBody.Entity);
-                        if (!hightlight.index.Equals(hitTile.index))
-                        {
-                            hightlight.index = hitTile.index;
-                            var newPos = new Translation { Value = hitTranslation.Value };
-                            newPos.Value.y -= 0.001f;
-                            EntityManager.SetComponentData<Translation>(entity, newPos);
-                        }
-                    });
+                    PostUpdateCommands.AddComponent(hitBody.Entity, new HexTileHightlightComponent());
 
                     Entities.ForEach((Entity entity, Transform transform, ref Rotation rotation) =>
                     {
@@ -80,5 +80,36 @@ namespace Unity.Physics.Extensions
                 }
             }
         }
+    }
+}
+
+public class RenderCursorSystem : ComponentSystem
+{
+    Mesh highlightMesh;
+    protected override void OnCreate()
+    {
+        HexMapSpawner.GetHexMesh(1, HexMapSpawner.HexOrientation.Flat, ref highlightMesh);
+        base.OnCreate();
+    }
+    protected override void OnUpdate()
+    {
+        var camera = Camera.main;
+        MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
+        int colorPropertyId = Shader.PropertyToID("_Color");
+        materialPropertyBlock.SetColor(colorPropertyId, Color.red);
+        Entities.WithAll<HexTileHightlightComponent>().ForEach((ref Translation translation) =>
+       {
+           Vector3 pos = translation.Value;
+           pos.y += 0.001f;
+           Graphics.DrawMesh(
+               highlightMesh,
+               pos,
+               Quaternion.identity,
+               Boostrap.YellowMaterial,
+               0,
+               camera,
+               0,
+               materialPropertyBlock);
+       });
     }
 }

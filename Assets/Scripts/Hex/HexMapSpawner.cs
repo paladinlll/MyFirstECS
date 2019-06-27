@@ -104,30 +104,30 @@ public class HexMapSpawner : MonoBehaviour
                 {
                     index = index
                 });
-                //float3[] points = new float3[hexMesh.mesh.vertices.Length];
-                //for (int i = 0; i < 6; i++)
-                //    points[i] = Corner(Vector3.zero, 1, i, orientation);
-                //BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.MeshCollider.Create(points, hexMesh.mesh.GetIndices(0), CollisionFilter.Default);
-                //var colliderComponent = new PhysicsCollider { Value = collider };
-                //entityManager.AddComponentData(entity, colliderComponent);
+                float3[] points = new float3[hexMesh.mesh.vertices.Length];
+                for (int i = 0; i < 6; i++)
+                    points[i] = Corner(Vector3.zero, 1, i, orientation);
+                BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.MeshCollider.Create(points, hexMesh.mesh.GetIndices(0), CollisionFilter.Default);
+                var colliderComponent = new PhysicsCollider { Value = collider };
+                entityManager.AddComponentData(entity, colliderComponent);
             }
         }
 
         //var highlightTile = new RenderMesh();
         //highlightTile.material = new Material(Boostrap.YellowMaterial);
-        var highlightTile = Boostrap.HexTerrain;
-        highlightTile.material = new Material(Boostrap.YellowMaterial);
+        //var highlightTile = Boostrap.HexTerrain;
+        //highlightTile.material = new Material(Boostrap.YellowMaterial);
         //GetHexMesh(1, orientation, ref highlightTile.mesh);
         {
-            var entity = entityManager.CreateEntity();
+            //var entity = entityManager.CreateEntity();
             // Place the instantiated entity in a grid with some noise
-            pos.x = 0;
-            pos.z = 0;
-            entityManager.AddComponentData(entity, new LocalToWorld { });
-            entityManager.AddComponentData(entity, new Translation { Value = pos });
-            entityManager.AddComponentData(entity, new Rotation { Value = Quaternion.identity });
-            entityManager.AddSharedComponentData(entity, highlightTile);
-            entityManager.AddComponentData(entity, new HexTerrainComponent());
+            //pos.x = 0;
+            //pos.z = 0;
+            //entityManager.AddComponentData(entity, new LocalToWorld { });
+            //entityManager.AddComponentData(entity, new Translation { Value = pos });
+            //entityManager.AddComponentData(entity, new Rotation { Value = Quaternion.identity });
+            //entityManager.AddSharedComponentData(entity, highlightTile);
+            //entityManager.AddComponentData(entity, new HexTerrainComponent());
             //var index = new CubeIndex(0, 0, 0);
             //entityManager.AddComponentData(entity, new HexTileHightlightComponent
             //{

@@ -51,5 +51,5 @@ public struct HexTileComponent : IComponentData
 
 public struct HexTileHightlightComponent : IComponentData
 {
-    public CubeIndex index;
+    //public CubeIndex index;
 }

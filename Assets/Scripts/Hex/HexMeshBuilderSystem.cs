@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Rendering;
+using Unity.Transforms;
 using UnityEngine;
 
 public class HexMeshBuilderSystem : ComponentSystem
@@ -25,6 +28,12 @@ public class HexMeshBuilderSystem : ComponentSystem
         vertices = new List<Vector3>();
         uvs = new List<Vector2>();
         triangles = new List<int>();
+
+        Triangulate(Vector3.zero);
+        hexMesh.vertices = vertices.ToArray();
+        //hexMesh.uv = uvs.ToArray();
+        hexMesh.triangles = triangles.ToArray();
+        hexMesh.RecalculateNormals();
     }
 
     void Triangulate(HexTileComponent[] cells)
@@ -61,12 +70,18 @@ public class HexMeshBuilderSystem : ComponentSystem
 
     void Triangulate(ref HexTileComponent cell)
     {
-        int last = vertices.Count;
         Vector3 pos = Vector3.zero;
         pos.x = 1 * 3.0f / 2.0f * cell.index.x;
         pos.z = 1 * Mathf.Sqrt(3.0f) * (cell.index.y + cell.index.x / 2.0f);
+        Triangulate(pos);
+    }
+
+    void Triangulate(Vector3 origin)
+    {
+        int last = vertices.Count;
+
         for (int i = 0; i < 6; i++)
-            vertices.Add(Corner(pos, 0.9f, i, HexOrientation.Flat));
+            vertices.Add(Corner(origin, 0.9f, i, HexOrientation.Flat));
 
         triangles.Add(last + 0);
         triangles.Add(last + 2);
@@ -93,54 +108,118 @@ public class HexMeshBuilderSystem : ComponentSystem
         uvs.Add(new Vector2(0, 0.75f));
     }
 
+    private struct RenderData
+    {
+        public Entity entity;
+        public float3 position;
+        public Matrix4x4 matrix;
+    }
+
+    [BurstCompile]
+    private struct CopyTileJob : IJobForEachWithEntity<Translation, HexTileComponent>
+    {
+        public NativeQueue<RenderData>.Concurrent nativeQueue;
+
+        public void Execute(Entity entity, int index, ref Translation translation, ref HexTileComponent hexTileComponent)
+        {
+            RenderData renderData = new RenderData
+            {
+                entity = entity,
+                position = translation.Value,
+                matrix = Matrix4x4.TRS(
+                        translation.Value,
+                        Quaternion.identity,
+                        Vector3.one)
+            };
+            nativeQueue.Enqueue(renderData);
+        }
+    }
+
+    [BurstCompile]
+    private struct NativeQueueToArrayJob : IJob
+    {
+        public NativeQueue<RenderData> nativeQueue;
+        public NativeArray<RenderData> nativeArray;
+
+        public void Execute()
+        {
+            int index = 0;
+            RenderData renderData;
+            while(nativeQueue.TryDequeue(out renderData))
+            {
+                nativeArray[index] = renderData;
+                index++;
+            }
+        }
+    }
+
+    [BurstCompile]
+    private struct FillArrayForParalleJob : IJobParallelFor
+    {
+        [ReadOnly] public NativeArray<RenderData> nativeArray;
+        [NativeDisableContainerSafetyRestriction] public NativeArray<Matrix4x4> matrixArray;
+
+        public void Execute(int index)
+        {
+            matrixArray[index] = nativeArray[index].matrix;
+        }
+    }
+
+
     protected override void OnUpdate()
     {
-        hexMesh.Clear();
-        vertices.Clear();
-        uvs.Clear();
-        triangles.Clear();
-        Entities.ForEach((Entity entity, ref HexTileComponent HexTileComponent) =>
-        {
-            Triangulate(ref HexTileComponent);
-        });
-        hexMesh.vertices = vertices.ToArray();
-        hexMesh.uv = uvs.ToArray();
-        hexMesh.triangles = triangles.ToArray();
-        hexMesh.RecalculateNormals();
+        NativeQueue<RenderData> nativeQueue = new NativeQueue<RenderData>(Allocator.TempJob);
 
-        Boostrap.HexTerrain.mesh = hexMesh;
+        CopyTileJob copyTileJob = new CopyTileJob
+        {
+            nativeQueue = nativeQueue.ToConcurrent()
+        };
+        JobHandle jobHandle = copyTileJob.Schedule(this);
+        jobHandle.Complete();
 
-        Entities.ForEach((Entity entity, RenderMesh renderMesh, ref HexTerrainComponent HexTerrainComponent) =>
+        NativeArray<RenderData> nativeArray = new NativeArray<RenderData>(nativeQueue.Count, Allocator.TempJob);
+
+        NativeQueueToArrayJob nativeQueueToArrayJob = new NativeQueueToArrayJob
         {
-            PostUpdateCommands.SetSharedComponent(entity, Boostrap.HexTerrain);
-        });
-        return;
-        var targetCount = m_MainGroup.CalculateLength();
-        if(targetCount == 0)
+            nativeQueue = nativeQueue,
+            nativeArray = nativeArray,
+        };
+        jobHandle = nativeQueueToArrayJob.Schedule();
+        jobHandle.Complete();
+        NativeArray<Matrix4x4> matrixArray = new NativeArray<Matrix4x4>(nativeArray.Length, Allocator.TempJob);
+
+        FillArrayForParalleJob fillArrayForParalleJob = new FillArrayForParalleJob
         {
-            return;
+            matrixArray = matrixArray,
+            nativeArray = nativeArray,
+        };
+        jobHandle = fillArrayForParalleJob.Schedule(nativeArray.Length, 10);
+        jobHandle.Complete();
+
+        nativeQueue.Dispose();
+
+        MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
+        int colorPropertyId = Shader.PropertyToID("_Color");
+
+        int sliceCount = 1023;
+        Matrix4x4[] matrixInstanceArray = new Matrix4x4[sliceCount];
+        for(int i=0;i< nativeArray.Length;i+= sliceCount)
+        {
+            int sliceSize = math.min(nativeArray.Length - i, sliceCount);
+            NativeArray<Matrix4x4>.Copy(matrixArray, i, matrixInstanceArray, 0, sliceSize);
+
+            materialPropertyBlock.SetColor(colorPropertyId, Color.white);
+            Graphics.DrawMeshInstanced(
+                hexMesh,
+                0,
+                Boostrap.YellowMaterial,
+                matrixInstanceArray,
+                sliceSize,
+                materialPropertyBlock);
         }
-        var groupEntities = m_MainGroup.ToEntityArray(Allocator.Persistent);
-        UnityEngine.Debug.Log(groupEntities.Length);
-        hexMesh.Clear();
-        vertices.Clear();
-        uvs.Clear();
-        triangles.Clear();
-        foreach (var entity in groupEntities)
-        {
-            var creator = EntityManager.GetComponentData<HexTileComponent>(entity);
-            Triangulate(ref creator);
 
-        }
-        hexMesh.vertices = vertices.ToArray();
-        hexMesh.uv = uvs.ToArray();
-        hexMesh.triangles = triangles.ToArray();
-        hexMesh.RecalculateNormals();
-
-        Boostrap.HexTerrain.mesh = hexMesh;
-
-
-        groupEntities.Dispose();
+        matrixArray.Dispose();
+        nativeArray.Dispose();
     }
 
     //struct CopyHexTiles : IJobForEachWithEntity<HexTileComponent>

@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using Unity.Entities;
+using Unity.Mathematics;
 
-public class InputComponent : MonoBehaviour
+public struct InputComponent : IComponentData
 {
-    public float Horizontal;
-    public float Vertical;
+    public float2 Move;
 }

@@ -82,7 +82,7 @@ public class HexMapSpawner : MonoBehaviour
         GetHexMesh(0.9f, orientation, ref hexMesh.mesh);
         Vector3 pos = new Vector3(0, -1, 0);
 
-        int mapSize = 5;
+        int mapSize = 10;
         float hexRadius = 1;
         for (int q = -mapSize; q <= mapSize; q++)
         {

@@ -1,20 +1,29 @@
 ﻿using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 using UnityEngine;
 
 public class PlayerMovementSystem : ComponentSystem
 {
     //[Inject] HexTileHightlightComponent hexTileHightlightComponent;
+    private EntityQuery query;
+
+    protected override void OnCreate()
+    {
+        query = GetEntityQuery(
+            ComponentType.ReadOnly<Transform>(),
+            ComponentType.ReadOnly<InputComponent>(),
+            ComponentType.ReadOnly<Rigidbody>());
+    }
 
     protected override void OnUpdate()
     {
         var deltaTime = Time.deltaTime;
-        Entities.ForEach((Entity entity, Rigidbody rigidbody, InputComponent inputComponent) =>
+        Entities.With(query).ForEach(
+            (Entity entity, Rigidbody rigidBody, ref InputComponent inputComponent) =>
         {
-            var moveVector = new Vector3(inputComponent.Horizontal, 0, inputComponent.Vertical);
-            var movePosition = rigidbody.position + moveVector.normalized * 3 * deltaTime;
-            rigidbody.MovePosition(movePosition);
+            var move = inputComponent.Move;
+            var moveVector = new Vector3(move.x, 0, move.y);
+            var movePosition = rigidBody.position + moveVector.normalized * 3 * deltaTime;
+            rigidBody.MovePosition(movePosition);
         });
 
         //Entities.ForEach((ref Rigidbody rotationSpeed, ref InputComponent rotation) =>

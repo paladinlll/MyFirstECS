@@ -85,31 +85,32 @@ namespace Unity.Physics.Extensions
 
 public class RenderCursorSystem : ComponentSystem
 {
-    Mesh highlightMesh;
+    //Mesh highlightMesh;
     protected override void OnCreate()
     {
-        HexMapSpawner.GetHexMesh(1, HexMapSpawner.HexOrientation.Flat, ref highlightMesh);
+        //highlightMesh = new Mesh();
+        //HexUtils.GetHexMesh(1, Bootstrap.Defines.orientation, ref highlightMesh);
         base.OnCreate();
     }
     protected override void OnUpdate()
     {
-        var camera = Camera.main;
-        MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
-        int colorPropertyId = Shader.PropertyToID("_Color");
-        materialPropertyBlock.SetColor(colorPropertyId, Color.red);
-        Entities.WithAll<HexTileHightlightComponent>().ForEach((ref Translation translation) =>
-       {
-           Vector3 pos = translation.Value;
-           pos.y += 0.001f;
-           Graphics.DrawMesh(
-               highlightMesh,
-               pos,
-               Quaternion.identity,
-               Boostrap.YellowMaterial,
-               0,
-               camera,
-               0,
-               materialPropertyBlock);
-       });
+       // var camera = Camera.main;
+       // MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
+       // int colorPropertyId = Shader.PropertyToID("_Color");
+       // materialPropertyBlock.SetColor(colorPropertyId, Color.red);
+       // Entities.WithAll<HexTileHightlightComponent>().ForEach((ref Translation translation) =>
+       //{
+       //    Vector3 pos = translation.Value;
+       //    pos.y += 0.001f;
+       //    Graphics.DrawMesh(
+       //        highlightMesh,
+       //        pos,
+       //        Quaternion.identity,
+       //        Bootstrap.Defines.YellowMaterial,
+       //        0,
+       //        camera,
+       //        0,
+       //        materialPropertyBlock);
+       //});
     }
 }

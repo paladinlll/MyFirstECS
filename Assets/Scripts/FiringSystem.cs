@@ -68,7 +68,7 @@ public class FiringSystem : JobComponentSystem
         public void Execute(Entity entity, int index, [ChangedFilter] ref Firing firing, [ReadOnly] ref LocalToWorld localToWorld, [ReadOnly] ref Rotation rotation)
         {
             var bulletEntity = CommandBuffer.CreateEntity(index);
-            CommandBuffer.AddSharedComponent(index, bulletEntity, Boostrap.BullerRenderer);
+            CommandBuffer.AddSharedComponent(index, bulletEntity, Bootstrap.Defines.BullerRenderer);
             CommandBuffer.AddComponent(index, bulletEntity, new LocalToWorld
             {
                 Value = float4x4.TRS(

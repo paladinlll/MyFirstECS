@@ -7,25 +7,21 @@ using Unity.Transforms;
 
 public class Bootstrap : MonoBehaviour
 {
-    //public static RenderMesh BullerRenderer;
-    //public static RenderMesh HighlightTile;
-    //public static RenderMesh HexTerrain;
-
-    //public static Material DefaultMaterial;
-    //public static Material YellowMaterial;
-
     public static GameDefines Defines;
 
     public static void NewGame()
     {
+        var entityManager = World.Active.EntityManager;
         var player = Object.Instantiate(Defines.PlayerPrefab);
         var entity = player.GetComponent<GameObjectEntity>().Entity;
-        var entityManager = World.Active.EntityManager;
 
         entityManager.AddComponentData(entity, new InputComponent { Move = new float2(0, 0) });
         entityManager.AddComponentData(entity, new Rotation { Value = quaternion.identity });
-
+        //entityManager.AddComponentData(entity, new Translation { Value = new CubeIndex(2, 1).ToWorldPos(Defines.TileRadius) });
+        Rigidbody rigidBody = player.GetComponent<Rigidbody>();
+        rigidBody.position = new CubeIndex(-2, 1).ToWorldPos(Defines.TileRadius);
         CreateMap(entityManager);
+        CreateCastle(entityManager);
     }
 
     public static void CreateMap(EntityManager entityManager)
@@ -65,6 +61,15 @@ public class Bootstrap : MonoBehaviour
             }
         }
     }
+
+    public static void CreateCastle(EntityManager entityManager)
+    {
+        var castle = Object.Instantiate(Defines.CastlePrefab);
+        castle.AddComponent<NonUniformScaleProxy>().Value = new NonUniformScale { Value = new float3(2.5f, 2.5f, 2.5f) };
+        castle.AddComponent<TranslationProxy>().Value = new Translation { Value = new float3(0, -1, 1) };
+        castle.AddComponent<ConvertToEntity>().ConversionMode = ConvertToEntity.Mode.ConvertAndDestroy;
+    }
+
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     public static void InitializeWithScene()

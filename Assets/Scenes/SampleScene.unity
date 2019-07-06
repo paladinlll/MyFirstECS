@@ -425,6 +425,8 @@ MonoBehaviour:
   TileMesh: {fileID: 4300000, guid: 008bf3cac50b1a14680ce9a91f33a9b0, type: 3}
   TileMaterial: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
   TileRadius: 2.9
+  CastlePrefab: {fileID: 1662837858102748, guid: c7f16756cd602174f9e5c60d3ce995f9,
+    type: 3}
 --- !u!4 &1374203072
 Transform:
   m_ObjectHideFlags: 0

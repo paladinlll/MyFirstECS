@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 
 public enum HexOrientation
 {
@@ -8,7 +9,7 @@ public enum HexOrientation
     Flat
 }
 
-public class HexUtils
+public static class HexUtils
 {
     public static Vector3 Corner(Vector3 origin, float radius, int corner, HexOrientation orientation)
     {
@@ -61,5 +62,13 @@ public class HexUtils
         mesh.name = "Hexagonal Plane";
 
         mesh.RecalculateNormals();
+    }
+
+    public static float3 ToWorldPos(this CubeIndex index, float hexRadius)
+    {
+        float3 pos = new float3(0, 0, 0);
+        pos.x = hexRadius * 3.0f / 2.0f * index.x;
+        pos.z = hexRadius * Mathf.Sqrt(3.0f) * (index.y + index.x / 2.0f);
+        return pos;
     }
 }

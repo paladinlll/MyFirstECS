@@ -42,6 +42,16 @@ public struct CubeIndex
     {
         return string.Format("[" + x + "," + y + "," + z + "]");
     }
+
+    public int Radius()
+    {
+        int dx = x - 0;
+        int dz = z - 0;
+        if (dx * dz < 0)
+            return Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dz));
+        else
+            return (Mathf.Abs(dx) + Mathf.Abs(dz));
+    }
 }
 
 public struct HexTileComponent : IComponentData

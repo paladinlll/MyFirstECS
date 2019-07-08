@@ -9,6 +9,60 @@ public enum HexOrientation
     Flat
 }
 
+public enum HexDirection
+{
+    NE, E, SE, SW, W, NW
+}
+
+public struct Point2D
+{
+    public int x;
+    public int y;
+
+    public static Point2D operator *(Point2D p, int k)
+    {
+        return new Point2D { x = p.x * k, y = p.y * k };
+    }
+
+    public static Point2D operator -(Point2D p1, Point2D p2)
+    {
+        return new Point2D { x = p1.x - p2.x, y = p1.y - p2.y };
+    }
+
+    public static Point2D operator +(Point2D p1, Point2D p2)
+    {
+        return new Point2D { x = p1.x + p2.x, y = p1.y + p2.y };
+    }
+}
+
+public static class HexDirectionExtensions
+{
+    public static Point2D[] Dirs =
+    {
+        new Point2D { x = 0, y = 1 },
+        new Point2D { x = 1, y = 0 },
+        new Point2D { x = 1, y = -1 },
+        new Point2D { x = 0, y = -1 },
+        new Point2D { x = -1,y = 0 },
+        new Point2D { x = -1,y = 1 },
+    };
+
+    public static HexDirection Opposite(this HexDirection direction)
+    {
+        return (int)direction < 3 ? (direction + 3) : (direction - 3);
+    }
+
+    public static HexDirection Previous(this HexDirection direction)
+    {
+        return direction == HexDirection.NE ? HexDirection.NW : (direction - 1);
+    }
+
+    public static HexDirection Next(this HexDirection direction)
+    {
+        return direction == HexDirection.NW ? HexDirection.NE : (direction + 1);
+    }
+}
+
 public static class HexUtils
 {
     public static Vector3 Corner(Vector3 origin, float radius, int corner, HexOrientation orientation)

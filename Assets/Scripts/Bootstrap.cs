@@ -37,7 +37,7 @@ public class Bootstrap : MonoBehaviour
             for (int i = 0; i < Radius; i++)
             {
                 //h.name = string.Format("Hex Layer: {0}, n: {1}", mult, hn);
-                Debug.Log($"{direction} -> {currentPoint.x}.{currentPoint.y}");
+                //Debug.Log($"{direction} -> {currentPoint.x}.{currentPoint.y}");
                 CreateTile(entityManager, currentPoint);
                 currentPoint = currentPoint + p;
             }
@@ -72,7 +72,7 @@ public class Bootstrap : MonoBehaviour
                 i = 0;
                 if (direction == HexDirection.W)
                 {
-                    Debug.Log($"{direction} -> {currentPoint.x}.{currentPoint.y}");
+                    //Debug.Log($"{direction} -> {currentPoint.x}.{currentPoint.y}");
                     CreateTile(entityManager, currentPoint);
                     currentPoint = currentPoint + p;
                     hn++;
@@ -88,14 +88,14 @@ public class Bootstrap : MonoBehaviour
     {
         var index = new CubeIndex(point.x, point.y, -point.x - point.y);
         var entity = entityManager.CreateEntity();
-        int tileRange = index.Radius();
-        float3 pos = new float3(0, tileRange * 0.5f, 0);
-        pos.x = Defines.TileRadius * 3.0f / 2.0f * point.y;
-        pos.z = Defines.TileRadius * Mathf.Sqrt(3.0f) * (point.x + point.y / 2.0f);
+        //int tileRange = index.Radius();
+
+        float3 pos = index.ToWorldPos(Defines.TileRadius);
+
+        Debug.Log($"{index} -> {pos} -> {HexUtils.FromPosition(pos, Defines.TileRadius)}");
         entityManager.AddComponentData(entity, new LocalToWorld { });
         entityManager.AddComponentData(entity, new Translation { Value = pos });
         entityManager.AddComponentData(entity, new Rotation { Value = Quaternion.identity });
-
 
         entityManager.AddComponentData(entity, new HexTileComponent
         {
@@ -124,19 +124,12 @@ public class Bootstrap : MonoBehaviour
                 entityManager.AddComponentData(entity, new LocalToWorld { });
                 entityManager.AddComponentData(entity, new Translation { Value = pos });
                 entityManager.AddComponentData(entity, new Rotation { Value = Quaternion.identity });
-                //entityManager.AddSharedComponentData(entity, hexMesh);
 
                 var index = new CubeIndex(q, r, -q - r);
                 entityManager.AddComponentData(entity, new HexTileComponent
                 {
                     index = index
                 });
-                float3[] points = new float3[6];
-                for (int i = 0; i < 6; i++)
-                    points[i] = HexUtils.Corner(Vector3.zero, 1, i, orientation);
-                //BlobAssetReference<Unity.Physics.Collider> collider = Unity.Physics.MeshCollider.Create(points, hexMesh.mesh.GetIndices(0), CollisionFilter.Default);
-                //var colliderComponent = new PhysicsCollider { Value = collider };
-                //entityManager.AddComponentData(entity, colliderComponent);
             }
         }
     }

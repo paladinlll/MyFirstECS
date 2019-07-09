@@ -118,11 +118,81 @@ public static class HexUtils
         mesh.RecalculateNormals();
     }
 
-    public static float3 ToWorldPos(this CubeIndex index, float hexRadius)
+    public static float3 ToWorldPos(this CubeIndex index, float outerRadius)
     {
         float3 pos = new float3(0, 0, 0);
-        pos.x = hexRadius * 3.0f / 2.0f * index.x;
-        pos.z = hexRadius * Mathf.Sqrt(3.0f) * (index.y + index.x / 2.0f);
+        pos.x = outerRadius * 3.0f / 2.0f * index.x;
+        pos.z = outerRadius * Mathf.Sqrt(3.0f) * (index.y + index.x / 2.0f);
         return pos;
     }
+
+    public const float outerToInner = 0.866025404f;
+    public const float innerToOuter = 1f / outerToInner;
+    public static CubeIndex FromPosition(Vector3 position, float outerRadius)
+    {
+        float innerRadius = outerRadius * outerToInner;
+
+        float column = position.z / (innerRadius * 2f);
+        float row = -column;
+
+        float offset = position.x / (outerRadius * 3f);
+        column -= offset;
+        row -= offset;
+
+        int iY = Mathf.RoundToInt(column);
+        int iZ = Mathf.RoundToInt(row);
+        int iX = Mathf.RoundToInt(-column - row);
+
+        if (iX + iY + iZ != 0)
+        {
+            float dX = Mathf.Abs(column - iX);
+            float dY = Mathf.Abs(row - iY);
+            float dZ = Mathf.Abs(-column - row - iZ);
+
+            if (dX > dY && dX > dZ)
+            {
+                iX = -iY - iZ;
+            }
+            else if (dZ > dY)
+            {
+                iZ = -iX - iY;
+            }
+        }
+
+        return new CubeIndex(iX, iZ);
+    }
+
+    //public static CubeIndex FromPosition(Vector3 position, float hexRadius)
+    //{
+    //    position /= hexRadius;
+    //    hexRadius = 1;
+    //    int column;
+    //    int row;
+
+    //    // Find out which major row and column we are on:
+    //    row = (int)(position.z / 0.87f);
+    //    column = (int)(position.x / (hexRadius + hexRadius / 2));
+
+    //    // Compute the offset into these row and column:
+    //    float dz = position.z - (float)row * 0.87f;
+    //    float dx = position.x - (float)column * (hexRadius + hexRadius / 2);
+
+    //    // Are we on the left of the hexagon edge, or on the right?
+    //    if (((row ^ column) & 1) == 0)
+    //    {
+    //        dz = 0.87f - dz;
+    //    }
+
+    //    int right = dz * (hexRadius - hexRadius / 2) < 0.87f * (dx - hexRadius / 2) ? 1 : 0;
+
+    //    // Now we have all the information we need, just fine-tune row and column.
+    //    row += (column ^ row ^ right) & 1;
+    //    column += right;
+
+    //    int iX = Mathf.RoundToInt(column);
+    //    int iY = Mathf.RoundToInt(row / 2);
+
+    //    return new CubeIndex(iX, iY, -iX -iY);
+    //    //return new CubeIndex(iX, iZ);
+    //}
 }

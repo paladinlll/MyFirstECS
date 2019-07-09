@@ -1,84 +1,124 @@
-﻿using Unity.Burst;
-using Unity.Collections;
-using Unity.Entities;
-using Unity.Jobs;
-using Unity.Mathematics;
-using Unity.Physics.Systems;
+﻿using Unity.Entities;
+//using Unity.Physics.Systems;
 using Unity.Rendering;
-using Unity.Transforms;
 using UnityEngine;
-using UnityEngine.Assertions;
-using static Unity.Physics.Math;
+using Unity.Transforms;
+using Unity.Collections;
+using Unity.Burst;
+using Unity.Mathematics;
+using Unity.Jobs;
+
 namespace Unity.Physics.Extensions
 {
-    [UpdateAfter(typeof(BuildPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
     public class HexCursorSystem : ComponentSystem
     {
-        BuildPhysicsWorld m_BuildPhysicsWorldSystem;
-        //EntityQuery m_MouseGroup;
-        protected override void OnCreate()
+        private struct TileData
         {
-            m_BuildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
-            //m_MouseGroup = GetEntityQuery(new EntityQueryDesc
-            //{
-            //    All = new ComponentType[] { typeof(HexTileComponent) }
-            //});
-
-            base.OnCreate();
+            public Entity entity;
+            public CubeIndex index;
         }
 
-        const float k_MaxDistance = 100.0f;
-        public struct SpringData
+        private struct CopyTileJob : IJobForEachWithEntity<HexTileComponent>
         {
-            public Entity Entity;
-            public int Dragging; // bool isn't blittable
-            public RenderMesh OriginRenderMesh;
-            //public float3 PointOnBody;
-            //public float MouseDepth;
+            public NativeQueue<TileData>.Concurrent nativeQueue;
+
+            public void Execute(Entity entity, int index, [ReadOnly] ref HexTileComponent hexTileComponent)
+            {
+                TileData tileData = new TileData
+                {
+                    entity = entity,
+                    index = hexTileComponent.index
+                };
+                nativeQueue.Enqueue(tileData);
+            }
+        }
+        [BurstCompile]
+        private struct NativeQueueToArrayJob : IJob
+        {
+            public NativeQueue<TileData> nativeQueue;
+            public NativeArray<TileData> nativeArray;
+
+            public void Execute()
+            {
+                int index = 0;
+                TileData renderData;
+                while (nativeQueue.TryDequeue(out renderData))
+                {
+                    nativeArray[index] = renderData;
+                    index++;
+                }
+            }
         }
 
         protected override void OnUpdate()
         {
-            //if (m_MouseGroup.CalculateLength() == 0)
-            //{
-            //    return;
-            //}
-            Entities.ForEach((Entity entity, ref Translation translation, ref HexTileComponent hexTileComponent) =>
-            {
+            NativeQueue<TileData> nativeQueue = new NativeQueue<TileData>(Allocator.TempJob);
 
-            });
+            CopyTileJob copyTileJob = new CopyTileJob
+            {
+                nativeQueue = nativeQueue.ToConcurrent()
+            };
+            JobHandle jobHandle = copyTileJob.Schedule(this);
+            jobHandle.Complete();
+
+            NativeArray<TileData> nativeArray = new NativeArray<TileData>(nativeQueue.Count, Allocator.TempJob);
+
+            NativeQueueToArrayJob nativeQueueToArrayJob = new NativeQueueToArrayJob
+            {
+                nativeQueue = nativeQueue,
+                nativeArray = nativeArray,
+            };
+            jobHandle = nativeQueueToArrayJob.Schedule();
+            jobHandle.Complete();
+
+            nativeQueue.Dispose();
 
             var camera = Camera.main;
-            if (camera != null)
+            if (camera != null && Input.GetMouseButtonDown(0))
             {
                 var mousePosition = Input.mousePosition;
                 var cameraRay = camera.ScreenPointToRay(mousePosition);
-                var rayInput = new RaycastInput
-                {
-                    Start = cameraRay.origin,
-                    End = cameraRay.origin + cameraRay.direction * k_MaxDistance,
-                    Filter = CollisionFilter.Default,
-                };
-                var CollisionWorld = m_BuildPhysicsWorldSystem.PhysicsWorld.CollisionWorld;
 
                 Entities.WithAll<HexTileHightlightComponent>().ForEach((Entity entity) =>
                 {
                     PostUpdateCommands.RemoveComponent<HexTileHightlightComponent>(entity);
                 });
-                if (CollisionWorld.CastRay(rayInput, out var closestHit))
+                var deltaTime = Time.deltaTime;
+                if (UnityEngine.Physics.Raycast(cameraRay, out var closestHit, float.PositiveInfinity))
                 {
-                    RigidBody hitBody = CollisionWorld.Bodies[closestHit.RigidBodyIndex];
-                    HexTileComponent hitTile = EntityManager.GetComponentData<HexTileComponent>(hitBody.Entity);
-                    PostUpdateCommands.AddComponent(hitBody.Entity, new HexTileHightlightComponent());
-
-                    Entities.ForEach((Entity entity, Transform transform, ref Rotation rotation) =>
+                    Vector3 mapPos = new Vector3(closestHit.point.x, 0, closestHit.point.z);
+                    CubeIndex index = HexUtils.FromPosition(mapPos, Bootstrap.Defines.TileRadius);
+                    Debug.DrawLine(Vector3.zero, closestHit.point, Color.red, 2.5f);
+                    for (int i = 0; i < nativeArray.Length; i++)
                     {
-                        var forward = closestHit.Position - (float3)transform.position;
-                        var lookAt = Quaternion.LookRotation(forward);
-                        rotation.Value = new Quaternion(0, lookAt.y, 0, lookAt.w).normalized;
-                    });
+                        if (nativeArray[i].index.Equals(index))
+                        {
+                            Debug.Log($"Hit {index}, {closestHit.point}");
+                            PostUpdateCommands.AddComponent(nativeArray[i].entity, new HexTileHightlightComponent());
+                            break;
+                        }
+                    }
+
+
+                }
+
+                //if (CollisionWorld.CastRay(rayInput, out var closestHit))
+                {
+                    //RigidBody hitBody = CollisionWorld.Bodies[closestHit.RigidBodyIndex];
+                    //Debug.Log($"Hit {closestHit.Position}");
+                    //HexTileComponent hitTile = EntityManager.GetComponentData<HexTileComponent>(hitBody.Entity);
+                    //PostUpdateCommands.AddComponent(hitBody.Entity, new HexTileHightlightComponent());
+
+                    //Entities.ForEach((Entity entity, Transform transform, ref Rotation rotation) =>
+                    //{
+                    //    var forward = closestHit.Position - (float3)transform.position;
+                    //    var lookAt = Quaternion.LookRotation(forward);
+                    //    rotation.Value = new Quaternion(0, lookAt.y, 0, lookAt.w).normalized;
+                    //});
                 }
             }
+
+            nativeArray.Dispose();
         }
     }
 }
@@ -94,23 +134,27 @@ public class RenderCursorSystem : ComponentSystem
     }
     protected override void OnUpdate()
     {
-       // var camera = Camera.main;
-       // MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
-       // int colorPropertyId = Shader.PropertyToID("_Color");
-       // materialPropertyBlock.SetColor(colorPropertyId, Color.red);
-       // Entities.WithAll<HexTileHightlightComponent>().ForEach((ref Translation translation) =>
-       //{
-       //    Vector3 pos = translation.Value;
-       //    pos.y += 0.001f;
-       //    Graphics.DrawMesh(
-       //        highlightMesh,
-       //        pos,
-       //        Quaternion.identity,
-       //        Bootstrap.Defines.YellowMaterial,
-       //        0,
-       //        camera,
-       //        0,
-       //        materialPropertyBlock);
-       //});
+        var camera = Camera.main;
+        //MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
+        //int colorPropertyId = Shader.PropertyToID("_Color");
+        //materialPropertyBlock.SetColor(colorPropertyId, Color.red);
+        Entities.WithAll<HexTileHightlightComponent>().ForEach((ref Translation translation) =>
+       {
+           Vector3 pos = translation.Value;
+           pos.y += 1;
+           Graphics.DrawMesh(
+                Bootstrap.Defines.highlightMesh,
+                Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one),
+                Bootstrap.Defines.YellowMaterial,
+                0,
+                camera);
+           //Graphics.DrawMesh(
+           //    Bootstrap.Defines.highlightMesh,
+           //    pos,
+           //    Quaternion.identity,
+           //    Bootstrap.Defines.YellowMaterial,
+           //    0,
+           //    camera);
+       });
     }
 }

@@ -92,7 +92,7 @@ public class Bootstrap : MonoBehaviour
 
         float3 pos = index.ToWorldPos(Defines.TileRadius);
 
-        Debug.Log($"{index} -> {pos} -> {HexUtils.FromPosition(pos, Defines.TileRadius)}");
+        //Debug.Log($"{index} -> {pos} -> {HexUtils.FromPosition(pos, Defines.TileRadius)}");
         entityManager.AddComponentData(entity, new LocalToWorld { });
         entityManager.AddComponentData(entity, new Translation { Value = pos });
         entityManager.AddComponentData(entity, new Rotation { Value = Quaternion.identity });

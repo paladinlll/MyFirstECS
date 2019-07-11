@@ -4,4 +4,6 @@ using Unity.Mathematics;
 public struct InputComponent : IComponentData
 {
     public float2 Move;
+    public float ZoomSpeed;
+    public float RotateSpeed;
 }

@@ -74,7 +74,7 @@ namespace Unity.Physics.Extensions
             nativeQueue.Dispose();
 
             var camera = Camera.main;
-            if (camera != null && Input.GetMouseButtonDown(0))
+            //if (camera != null && Input.GetMouseButtonDown(0))
             {
                 var mousePosition = Input.mousePosition;
                 var cameraRay = camera.ScreenPointToRay(mousePosition);
@@ -93,28 +93,10 @@ namespace Unity.Physics.Extensions
                     {
                         if (nativeArray[i].index.Equals(index))
                         {
-                            Debug.Log($"Hit {index}, {closestHit.point}");
                             PostUpdateCommands.AddComponent(nativeArray[i].entity, new HexTileHightlightComponent());
                             break;
                         }
                     }
-
-
-                }
-
-                //if (CollisionWorld.CastRay(rayInput, out var closestHit))
-                {
-                    //RigidBody hitBody = CollisionWorld.Bodies[closestHit.RigidBodyIndex];
-                    //Debug.Log($"Hit {closestHit.Position}");
-                    //HexTileComponent hitTile = EntityManager.GetComponentData<HexTileComponent>(hitBody.Entity);
-                    //PostUpdateCommands.AddComponent(hitBody.Entity, new HexTileHightlightComponent());
-
-                    //Entities.ForEach((Entity entity, Transform transform, ref Rotation rotation) =>
-                    //{
-                    //    var forward = closestHit.Position - (float3)transform.position;
-                    //    var lookAt = Quaternion.LookRotation(forward);
-                    //    rotation.Value = new Quaternion(0, lookAt.y, 0, lookAt.w).normalized;
-                    //});
                 }
             }
 

@@ -422,6 +422,11 @@ MonoBehaviour:
   DefaultMaterial: {fileID: 2100000, guid: dd7af49cab6fdd043867db709c8e6367, type: 2}
   YellowMaterial: {fileID: 2100000, guid: 0ceb05d8b664c584884e876386b15f70, type: 2}
   orientation: 1
+  tileCollections:
+    meshes:
+    - {fileID: 4300000, guid: 1af34cea437b85f4fb64afebad6a0088, type: 3}
+    - {fileID: 4300000, guid: 34bf023270b401c4c863917f28f31faf, type: 3}
+    - {fileID: 4300000, guid: 5fd58ef91b4510e45bdae45dd50f67f1, type: 3}
   TileMesh: {fileID: 4300000, guid: 008bf3cac50b1a14680ce9a91f33a9b0, type: 3}
   TileMaterial: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
   TileRadius: 3

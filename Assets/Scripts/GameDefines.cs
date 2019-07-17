@@ -11,6 +11,7 @@ public class GameDefines : MonoBehaviour
     public Material YellowMaterial;
     public HexOrientation orientation = HexOrientation.Flat;
 
+    public HexFeatureCollection tileCollections;
     public Mesh TileMesh;
     public Material TileMaterial;
     public float TileRadius = 3;

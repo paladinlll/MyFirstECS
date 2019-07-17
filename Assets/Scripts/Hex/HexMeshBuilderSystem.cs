@@ -14,6 +14,7 @@ public class HexMeshBuilderSystem : ComponentSystem
     private struct RenderData
     {
         public Entity entity;
+        public HexTileComponent hexTile;
         public float3 position;
         public Matrix4x4 matrix;
     }
@@ -21,20 +22,29 @@ public class HexMeshBuilderSystem : ComponentSystem
     [BurstCompile]
     private struct CopyTileJob : IJobForEachWithEntity<Translation, HexTileComponent>
     {
-        public NativeQueue<RenderData>.Concurrent nativeQueue;
+        public NativeQueue<RenderData>.Concurrent terrain0NativeQueue;
+        public NativeQueue<RenderData>.Concurrent terrain1NativeQueue;
 
         public void Execute(Entity entity, int index, ref Translation translation, ref HexTileComponent hexTileComponent)
         {
             RenderData renderData = new RenderData
             {
                 entity = entity,
+                hexTile = hexTileComponent,
                 position = translation.Value,
                 matrix = Matrix4x4.TRS(
                         translation.Value,
                         Quaternion.identity,
                         Vector3.one)
             };
-            nativeQueue.Enqueue(renderData);
+            if (hexTileComponent.terrainTypeIndex == 0)
+            {
+                terrain0NativeQueue.Enqueue(renderData);
+            }
+            else
+            {
+                terrain1NativeQueue.Enqueue(renderData);
+            }
         }
     }
 
@@ -47,11 +57,11 @@ public class HexMeshBuilderSystem : ComponentSystem
         public void Execute()
         {
             int index = 0;
+
             RenderData renderData;
-            while(nativeQueue.TryDequeue(out renderData))
+            while (nativeQueue.TryDequeue(out renderData))
             {
-                nativeArray[index] = renderData;
-                index++;
+                nativeArray[index++] = renderData;
             }
         }
     }
@@ -60,62 +70,103 @@ public class HexMeshBuilderSystem : ComponentSystem
     private struct FillArrayForParalleJob : IJobParallelFor
     {
         [ReadOnly] public NativeArray<RenderData> nativeArray;
+        //[ReadOnly] public NativeArray<RenderData> terrain1NativeArray;
         [NativeDisableContainerSafetyRestriction] public NativeArray<Matrix4x4> matrixArray;
+        public int startingIndex;
 
         public void Execute(int index)
         {
-            matrixArray[index] = nativeArray[index].matrix;
+            RenderData renderData = nativeArray[index];
+            matrixArray[startingIndex + index] = renderData.matrix;
         }
     }
 
     protected override void OnUpdate()
     {
-        NativeQueue<RenderData> nativeQueue = new NativeQueue<RenderData>(Allocator.TempJob);
+        NativeQueue<RenderData> terrain0NativeQueue = new NativeQueue<RenderData>(Allocator.TempJob);
+        NativeQueue<RenderData> terrain1NativeQueue = new NativeQueue<RenderData>(Allocator.TempJob);
 
         CopyTileJob copyTileJob = new CopyTileJob
         {
-            nativeQueue = nativeQueue.ToConcurrent()
+            terrain0NativeQueue = terrain0NativeQueue.ToConcurrent(),
+            terrain1NativeQueue = terrain1NativeQueue.ToConcurrent()
         };
         JobHandle jobHandle = copyTileJob.Schedule(this);
         jobHandle.Complete();
 
-        NativeArray<RenderData> nativeArray = new NativeArray<RenderData>(nativeQueue.Count, Allocator.TempJob);
+        NativeArray<RenderData> terrain0NativeArray = new NativeArray<RenderData>(terrain0NativeQueue.Count, Allocator.TempJob);
+        NativeArray<RenderData> terrain1NativeArray = new NativeArray<RenderData>(terrain1NativeQueue.Count, Allocator.TempJob);
 
-        NativeQueueToArrayJob nativeQueueToArrayJob = new NativeQueueToArrayJob
+        NativeArray<JobHandle> jobHandleArray = new NativeArray<JobHandle>(2, Allocator.TempJob);
+
+        NativeQueueToArrayJob terrain0NativeQueueToArrayJob = new NativeQueueToArrayJob
         {
-            nativeQueue = nativeQueue,
-            nativeArray = nativeArray,
+            nativeQueue = terrain0NativeQueue,
+            nativeArray = terrain0NativeArray,
         };
-        jobHandle = nativeQueueToArrayJob.Schedule();
-        jobHandle.Complete();
-        NativeArray<Matrix4x4> matrixArray = new NativeArray<Matrix4x4>(nativeArray.Length, Allocator.TempJob);
+        jobHandleArray[0] = terrain0NativeQueueToArrayJob.Schedule();
 
-        FillArrayForParalleJob fillArrayForParalleJob = new FillArrayForParalleJob
+        NativeQueueToArrayJob terrain1NativeQueueToArrayJob = new NativeQueueToArrayJob
+        {
+            nativeQueue = terrain1NativeQueue,
+            nativeArray = terrain1NativeArray,
+        };
+        jobHandleArray[1] = terrain1NativeQueueToArrayJob.Schedule();
+
+        JobHandle.CompleteAll(jobHandleArray);
+
+        terrain0NativeQueue.Dispose();
+        terrain1NativeQueue.Dispose();
+
+        int visibleTileTotal = terrain0NativeArray.Length + terrain1NativeArray.Length;
+
+        NativeArray<Matrix4x4> matrixArray = new NativeArray<Matrix4x4>(visibleTileTotal, Allocator.TempJob);
+
+        FillArrayForParalleJob fillArrayForParalleJob_0 = new FillArrayForParalleJob
         {
             matrixArray = matrixArray,
-            nativeArray = nativeArray,
+            nativeArray = terrain0NativeArray,
+            startingIndex = 0
         };
-        jobHandle = fillArrayForParalleJob.Schedule(nativeArray.Length, 10);
-        jobHandle.Complete();
+        jobHandleArray[0] = fillArrayForParalleJob_0.Schedule(terrain0NativeArray.Length, 10);
 
-        nativeQueue.Dispose();
+        FillArrayForParalleJob fillArrayForParalleJob_1 = new FillArrayForParalleJob
+        {
+            matrixArray = matrixArray,
+            nativeArray = terrain1NativeArray,
+            startingIndex = terrain0NativeArray.Length
+        };
+        jobHandleArray[1] = fillArrayForParalleJob_1.Schedule(terrain1NativeArray.Length, 10);
+
+        JobHandle.CompleteAll(jobHandleArray);
 
         int sliceCount = 1023;
-        Matrix4x4[] matrixInstanceArray = new Matrix4x4[sliceCount];
-        for(int i=0;i< nativeArray.Length;i+= sliceCount)
+        Matrix4x4[] matrixInstanceArray = new Matrix4x4[1023];
+        int off = 0;
+        //for(int i=0;i< nativeArray.Length;i+= sliceCount)
+        while (off < visibleTileTotal)
         {
-            int sliceSize = math.min(nativeArray.Length - i, sliceCount);
-            NativeArray<Matrix4x4>.Copy(matrixArray, i, matrixInstanceArray, 0, sliceSize);
+            float tilePick = off < terrain0NativeArray.Length ? 0 : 0.34f;
+            int sliceSize = math.min(visibleTileTotal - off, sliceCount);
+            if (off < terrain0NativeArray.Length && off + sliceSize >= terrain0NativeArray.Length)
+            {
+                sliceSize = terrain0NativeArray.Length - off;
+            }
+            NativeArray<Matrix4x4>.Copy(matrixArray, off, matrixInstanceArray, 0, sliceSize);
 
             Graphics.DrawMeshInstanced(
-                Bootstrap.Defines.TileMesh,
+                Bootstrap.Defines.tileCollections.Pick(tilePick),
                 0,
                 Bootstrap.Defines.TileMaterial,
                 matrixInstanceArray,
                 sliceSize);
+
+            off += sliceSize;
         }
 
         matrixArray.Dispose();
-        nativeArray.Dispose();
+        terrain0NativeArray.Dispose();
+        terrain1NativeArray.Dispose();
+        jobHandleArray.Dispose();
     }
 }

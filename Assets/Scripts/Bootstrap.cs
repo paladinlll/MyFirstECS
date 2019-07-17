@@ -21,14 +21,16 @@ public class Bootstrap : MonoBehaviour
         Rigidbody rigidBody = player.GetComponent<Rigidbody>();
         rigidBody.position = new CubeIndex(-2, 1).ToWorldPos(Defines.TileRadius);
         //CreateMap(entityManager);
-        CreateStrokeMap(entityManager);
+        for (int i = 1; i < 5; i++)
+        {
+            CreateStrokeMap(entityManager, i, i % 2);
+        }
         CreateCastle(entityManager);
     }
 
-    public static void CreateStrokeMap(EntityManager entityManager)
+    public static void CreateStrokeMap(EntityManager entityManager, int Radius, int terrainTypeIndex)
     {
         float HexSide = Defines.TileRadius;
-        int Radius = 5;
 
         for (HexDirection direction = HexDirection.NE; direction <= HexDirection.NW; direction++)
         {
@@ -38,16 +40,16 @@ public class Bootstrap : MonoBehaviour
             {
                 //h.name = string.Format("Hex Layer: {0}, n: {1}", mult, hn);
                 //Debug.Log($"{direction} -> {currentPoint.x}.{currentPoint.y}");
-                CreateTile(entityManager, currentPoint);
+                CreateTile(entityManager, currentPoint, terrainTypeIndex);
                 currentPoint = currentPoint + p;
             }
         }
     }
 
-    public static void CreateFillMap(EntityManager entityManager)
+    public static void CreateFillMap(EntityManager entityManager, int terrainTypeIndex)
     {
         float HexSide = Defines.TileRadius;
-        int Radius = 3;
+        int Radius = 5;
 
         Point2D currentPoint = new Point2D { x = 0, y = 0 };
         currentPoint += HexDirectionExtensions.Dirs[(int)HexDirection.W];
@@ -65,7 +67,7 @@ public class Bootstrap : MonoBehaviour
                 {
                     //h.name = string.Format("Hex Layer: {0}, n: {1}", mult, hn);
                     Debug.Log($"{direction} -> {currentPoint.x}.{currentPoint.y}");
-                    CreateTile(entityManager, currentPoint);
+                    CreateTile(entityManager, currentPoint, terrainTypeIndex);
                     currentPoint = currentPoint + p;
 
                 }
@@ -73,7 +75,7 @@ public class Bootstrap : MonoBehaviour
                 if (direction == HexDirection.W)
                 {
                     //Debug.Log($"{direction} -> {currentPoint.x}.{currentPoint.y}");
-                    CreateTile(entityManager, currentPoint);
+                    CreateTile(entityManager, currentPoint, terrainTypeIndex);
                     currentPoint = currentPoint + p;
                     hn++;
                     if (mult == Radius)
@@ -84,7 +86,7 @@ public class Bootstrap : MonoBehaviour
         }
     }
 
-    public static void CreateTile(EntityManager entityManager, Point2D point)
+    public static void CreateTile(EntityManager entityManager, Point2D point, int terrainTypeIndex)
     {
         var index = new CubeIndex(point.x, point.y, -point.x - point.y);
         var entity = entityManager.CreateEntity();
@@ -99,7 +101,8 @@ public class Bootstrap : MonoBehaviour
 
         entityManager.AddComponentData(entity, new HexTileComponent
         {
-            index = index
+            index = index,
+            terrainTypeIndex = terrainTypeIndex
         });
     }
 

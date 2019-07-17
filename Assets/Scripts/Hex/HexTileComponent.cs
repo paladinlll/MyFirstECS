@@ -57,6 +57,7 @@ public struct CubeIndex
 public struct HexTileComponent : IComponentData
 {
     public CubeIndex index;
+    public int terrainTypeIndex;
 }
 
 public struct HexTileHightlightComponent : IComponentData

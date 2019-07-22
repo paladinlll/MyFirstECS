@@ -19,7 +19,11 @@ public class Bootstrap : MonoBehaviour
         entityManager.AddComponentData(entity, new Rotation { Value = quaternion.identity });
         //entityManager.AddComponentData(entity, new Translation { Value = new CubeIndex(2, 1).ToWorldPos(Defines.TileRadius) });
         Rigidbody rigidBody = player.GetComponent<Rigidbody>();
-        rigidBody.position = new CubeIndex(-2, 1).ToWorldPos(Defines.TileRadius);
+
+        var playerPos = new CubeIndex(-2, 1).ToWorldPos(Defines.TileRadius);
+        player.transform.position = playerPos;
+        rigidBody.position = playerPos;
+        rigidBody.velocity = Vector3.zero;
         //CreateMap(entityManager);
         for (int i = 1; i < 5; i++)
         {

@@ -117,26 +117,16 @@ public class RenderCursorSystem : ComponentSystem
     protected override void OnUpdate()
     {
         var camera = Camera.main;
-        //MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
-        //int colorPropertyId = Shader.PropertyToID("_Color");
-        //materialPropertyBlock.SetColor(colorPropertyId, Color.red);
         Entities.WithAll<HexTileHightlightComponent>().ForEach((ref Translation translation) =>
-       {
+        {
            Vector3 pos = translation.Value;
-           pos.y += 1;
+           pos.y += 0.25f;
            Graphics.DrawMesh(
                 Bootstrap.Defines.highlightMesh,
                 Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one),
                 Bootstrap.Defines.YellowMaterial,
                 0,
                 camera);
-           //Graphics.DrawMesh(
-           //    Bootstrap.Defines.highlightMesh,
-           //    pos,
-           //    Quaternion.identity,
-           //    Bootstrap.Defines.YellowMaterial,
-           //    0,
-           //    camera);
-       });
+        });
     }
 }

@@ -1,87 +1,45 @@
 ﻿using UnityEngine;
 using Unity.Entities;
-using Unity.Transforms;
 using Unity.Collections;
-using Unity.Burst;
+using Unity.Transforms;
 using Unity.Mathematics;
-using Unity.Jobs;
 
-public class PlayerRotationSystem : JobComponentSystem
+public class PlayerRotationSystem : ComponentSystem
 {
-    private EntityQuery m_BoidGroup;
-    private EntityQuery m_TargetGroup;
+    private EntityQuery playerQuery;
+    private EntityQuery selectingHexQuery;
+
     protected override void OnCreate()
     {
-        m_TargetGroup = GetEntityQuery(new EntityQueryDesc
-        {
-            All = new[] { ComponentType.ReadOnly<HexTileHightlightComponent>(), ComponentType.ReadOnly<LocalToWorld>() },
-        });
-
-        m_BoidGroup = GetEntityQuery(new EntityQueryDesc
-        {
-            All = new[] { ComponentType.ReadOnly<InputComponent>(),
-                ComponentType.ReadOnly<LocalToWorld>(),
-                ComponentType.ReadOnly<Rotation>()},
-        });
-        base.OnCreate();
+        playerQuery = GetEntityQuery(
+            ComponentType.ReadOnly<Transform>(),
+            ComponentType.ReadOnly<InputComponent>(),
+            ComponentType.ReadOnly<Rotation>(),
+            ComponentType.ReadOnly<Rigidbody>()
+            //,ComponentType.Exclude<DeadData>()
+            );
+        selectingHexQuery = GetEntityQuery(
+            ComponentType.ReadOnly<HexTileHightlightComponent>(),
+            ComponentType.ReadOnly<Translation>());
     }
 
-    [BurstCompile]
-    struct CopyPositions : IJobForEachWithEntity<LocalToWorld>
+    protected override void OnUpdate()
     {
-        public NativeArray<float3> positions;
-
-        public void Execute(Entity entity, int index, [ReadOnly]ref LocalToWorld localToWorld)
+        var hightlightTranslations = selectingHexQuery.ToComponentDataArray<Translation>(Allocator.TempJob);
+        if (hightlightTranslations.Length == 0)
         {
-            positions[index] = localToWorld.Position;
+            hightlightTranslations.Dispose();
+            return;
         }
-    }
-
-    [BurstCompile]
-    struct Steer : IJobForEachWithEntity<LocalToWorld, Rotation>
-    {
-        [ReadOnly] public NativeArray<float3> targetPositions;
-
-        public void Execute(Entity entity, int index,[ReadOnly] ref LocalToWorld localToWorld, ref Rotation rotation)
+        var cursorPos = hightlightTranslations[0].Value;
+        Entities.With(playerQuery).ForEach((Transform transform, ref Rotation rotation) =>
         {
-            var forward = targetPositions[0] - localToWorld.Position;
-            var lookAt = Quaternion.LookRotation(forward);
+            var position = transform.position;
+            var playerToMouse = cursorPos - new float3(position.x, position.y, position.z);
+            playerToMouse.y = 0f;
+            var lookAt = Quaternion.LookRotation(playerToMouse);
             rotation.Value = new Quaternion(0, lookAt.y, 0, lookAt.w).normalized;
-        }
-    }
-
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
-    {
-        //var targetCount = m_TargetGroup.CalculateLength();
-        //if (targetCount != 1) return inputDeps;
-        //var copyTargetPositions = new NativeArray<float3>(targetCount, Allocator.TempJob,
-        //            NativeArrayOptions.UninitializedMemory);
-        //var copyTargetPositionsJob = new CopyPositions
-        //{
-        //    positions = copyTargetPositions
-        //};
-        //var copyTargetPositionsJobHandle = copyTargetPositionsJob.Schedule(m_TargetGroup, inputDeps);
-
-        //var steerJob = new Steer
-        //{
-        //    targetPositions = copyTargetPositions,
-        //};
-        //var steerJobHandle = steerJob.Schedule(m_BoidGroup, copyTargetPositionsJobHandle);
-        //steerJobHandle.Complete();
-        //copyTargetPositions.Dispose();
-        return inputDeps;
-        //var mousePosition = Input.mousePosition;
-        //var cameraRay = Camera.main.ScreenPointToRay(mousePosition);
-        //var layerMask = LayerMask.GetMask("Floor");
-        //var deltaTime = Time.deltaTime;
-        //if (Physics.Raycast(cameraRay, out var hit, 100, layerMask))
-        //{
-        //    Entities.ForEach((Entity entity, Transform transform, ref Rotation rotation) =>
-        //    {
-        //        var forward = hit.point - transform.position;
-        //        var lookAt = Quaternion.LookRotation(forward);
-        //        rotation.Value = new Quaternion(0, lookAt.y, 0, lookAt.w).normalized;
-        //    });
-        //}
+        });
+        hightlightTranslations.Dispose();
     }
 }

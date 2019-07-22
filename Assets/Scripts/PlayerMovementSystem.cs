@@ -1,4 +1,5 @@
 ﻿using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class PlayerMovementSystem : ComponentSystem
@@ -21,21 +22,17 @@ public class PlayerMovementSystem : ComponentSystem
         Entities.With(query).ForEach(
             (Entity entity, Rigidbody rigidBody, ref InputComponent inputComponent) =>
         {
-            var forward = rigidBody.position - mainCamera.transform.position;
-            forward.y = 0;
-            var quaternion = Quaternion.LookRotation(forward, Vector3.up);
-
             var move = inputComponent.Move;
-            var moveVector = quaternion * new Vector3(move.x, 0, move.y);
-            var movePosition = rigidBody.position + moveVector.normalized * 3 * deltaTime;
-            rigidBody.MovePosition(movePosition);
+            if (math.abs(move.x) > 0.0001f || math.abs(move.y) > 0.0001f)
+            {
+                var forward = rigidBody.position - mainCamera.transform.position;
+                forward.y = 0;
+                var quaternion = Quaternion.LookRotation(forward, Vector3.up);
+                var moveVector = quaternion * new Vector3(move.x, 0, move.y);
+                moveVector.y = 0;
+                var movePosition = rigidBody.position + moveVector.normalized * 5 * deltaTime;
+                rigidBody.MovePosition(movePosition);
+            }
         });
-
-        //Entities.ForEach((ref Rigidbody rotationSpeed, ref InputComponent rotation) =>
-        //{
-        //    var deltaTime = Time.deltaTime;
-        //    rotation.Value = math.mul(math.normalize(rotation.Value),
-        //        quaternion.AxisAngle(math.up(), rotationSpeed.RadiansPerSecond * deltaTime));
-        //});
     }
 }

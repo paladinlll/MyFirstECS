@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -81,6 +79,7 @@ public class HexMeshBuilderSystem : ComponentSystem
         }
     }
 
+    Matrix4x4[] matrixInstanceArray = new Matrix4x4[1023];
     protected override void OnUpdate()
     {
         NativeQueue<RenderData> terrain0NativeQueue = new NativeQueue<RenderData>(Allocator.TempJob);
@@ -140,8 +139,7 @@ public class HexMeshBuilderSystem : ComponentSystem
 
         JobHandle.CompleteAll(jobHandleArray);
 
-        int sliceCount = 1023;
-        Matrix4x4[] matrixInstanceArray = new Matrix4x4[1023];
+        int sliceCount = matrixInstanceArray.Length;
         int off = 0;
         //for(int i=0;i< nativeArray.Length;i+= sliceCount)
         while (off < visibleTileTotal)

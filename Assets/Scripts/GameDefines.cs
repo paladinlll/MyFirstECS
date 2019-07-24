@@ -16,5 +16,7 @@ public class GameDefines : MonoBehaviour
     public Material TileMaterial;
     public float TileRadius = 3;
 
-    public GameObject CastlePrefab;
+    public RenderMesh CastlePrefab;
+
+    public RenderMesh[] ResourceNodesPrefab;
 }

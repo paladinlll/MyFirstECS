@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
+[DisableAutoCreation]
 public class PlayerShootingSystem : JobComponentSystem
 {
     EntityCommandBufferSystem m_Barrier;

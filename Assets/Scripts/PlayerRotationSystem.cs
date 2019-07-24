@@ -37,8 +37,11 @@ public class PlayerRotationSystem : ComponentSystem
             var position = transform.position;
             var playerToMouse = cursorPos - new float3(position.x, position.y, position.z);
             playerToMouse.y = 0f;
-            var lookAt = Quaternion.LookRotation(playerToMouse);
-            rotation.Value = new Quaternion(0, lookAt.y, 0, lookAt.w).normalized;
+            if (math.abs(playerToMouse.x) > 0.0001f || math.abs(playerToMouse.z) > 0.0001f)
+            {
+                var lookAt = Quaternion.LookRotation(playerToMouse);
+                rotation.Value = new Quaternion(0, lookAt.y, 0, lookAt.w).normalized;
+            }
         });
         hightlightTranslations.Dispose();
     }

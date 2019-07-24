@@ -120,7 +120,7 @@ public class RenderCursorSystem : ComponentSystem
         Entities.WithAll<HexTileHightlightComponent>().ForEach((ref Translation translation) =>
         {
            Vector3 pos = translation.Value;
-           pos.y += 0.25f;
+           pos.y += 0.05f;
            Graphics.DrawMesh(
                 Bootstrap.Defines.highlightMesh,
                 Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one),

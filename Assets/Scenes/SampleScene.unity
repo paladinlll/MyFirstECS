@@ -412,7 +412,7 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 6090648099636821384, guid: b7dfec534979d5b4ea15fc5cec806a41,
     type: 3}
   BullerRenderer:
-    mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+    mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 3}
     material: {fileID: 2100000, guid: 0ceb05d8b664c584884e876386b15f70, type: 2}
     subMesh: 0
     layer: 0
@@ -430,8 +430,56 @@ MonoBehaviour:
   TileMesh: {fileID: 4300000, guid: 008bf3cac50b1a14680ce9a91f33a9b0, type: 3}
   TileMaterial: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
   TileRadius: 3
-  CastlePrefab: {fileID: 1662837858102748, guid: c7f16756cd602174f9e5c60d3ce995f9,
-    type: 3}
+  CastlePrefab:
+    mesh: {fileID: 4300000, guid: 6a9ced45f71b0bf429415814d8d48101, type: 3}
+    material: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
+    subMesh: 0
+    layer: 0
+    castShadows: 0
+    receiveShadows: 0
+  ResourceNodesPrefab:
+  - mesh: {fileID: 4300000, guid: 5da86f33a88fa0549b1841b44bc73554, type: 3}
+    material: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
+    subMesh: 0
+    layer: 0
+    castShadows: 0
+    receiveShadows: 0
+  - mesh: {fileID: 4300000, guid: 4cceaf64cd697cc45bb4a0fa41219f81, type: 3}
+    material: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
+    subMesh: 0
+    layer: 0
+    castShadows: 0
+    receiveShadows: 0
+  - mesh: {fileID: 4300000, guid: d09cc3e5099ce004aad464eda0cdca36, type: 3}
+    material: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
+    subMesh: 0
+    layer: 0
+    castShadows: 0
+    receiveShadows: 0
+  - mesh: {fileID: 4300000, guid: 6980727caa3674742a336d425e8754a9, type: 3}
+    material: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
+    subMesh: 0
+    layer: 0
+    castShadows: 0
+    receiveShadows: 0
+  - mesh: {fileID: 4300000, guid: 9992cfa612cf0464e8993f981779d787, type: 3}
+    material: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
+    subMesh: 0
+    layer: 0
+    castShadows: 0
+    receiveShadows: 0
+  - mesh: {fileID: 4300000, guid: 4b65c658510d61c47ab00a3621391fa8, type: 3}
+    material: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
+    subMesh: 0
+    layer: 0
+    castShadows: 0
+    receiveShadows: 0
+  - mesh: {fileID: 4300000, guid: 180a0ee495f12f24d92e6bdf627632e1, type: 3}
+    material: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
+    subMesh: 0
+    layer: 0
+    castShadows: 0
+    receiveShadows: 0
 --- !u!4 &1374203072
 Transform:
   m_ObjectHideFlags: 0

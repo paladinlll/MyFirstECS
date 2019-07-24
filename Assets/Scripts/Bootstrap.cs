@@ -24,12 +24,16 @@ public class Bootstrap : MonoBehaviour
         player.transform.position = playerPos;
         rigidBody.position = playerPos;
         rigidBody.velocity = Vector3.zero;
+
+        CreateTile(entityManager, new Point2D { x = 0, y = 0 }, 0);
         //CreateMap(entityManager);
-        for (int i = 1; i < 5; i++)
+        for (int i = 1; i < 10; i++)
         {
             CreateStrokeMap(entityManager, i, i % 2);
         }
         CreateCastle(entityManager);
+
+        CreateResourceNode(entityManager, new Point2D { x = 2, y = 2 }, 0);
     }
 
     public static void CreateStrokeMap(EntityManager entityManager, int Radius, int terrainTypeIndex)
@@ -143,12 +147,38 @@ public class Bootstrap : MonoBehaviour
 
     public static void CreateCastle(EntityManager entityManager)
     {
-        var castle = Object.Instantiate(Defines.CastlePrefab);
-        castle.AddComponent<NonUniformScaleProxy>().Value = new NonUniformScale { Value = new float3(2.5f, 2.5f, 2.5f) };
-        castle.AddComponent<TranslationProxy>().Value = new Translation { Value = new float3(0, -1, 1) };
-        castle.AddComponent<ConvertToEntity>().ConversionMode = ConvertToEntity.Mode.ConvertAndDestroy;
+        var entity = entityManager.CreateEntity();
+        entityManager.AddComponentData(entity, new NonUniformScale { Value = new float3(2.5f, 2.5f, 2.5f) });
+        entityManager.AddComponentData(entity, new LocalToWorld { });
+        entityManager.AddComponentData(entity, new Translation { Value = new float3() });
+        entityManager.AddComponentData(entity, new Rotation { Value = Quaternion.identity });
+        entityManager.AddSharedComponentData(entity, Defines.CastlePrefab);
+
+        //var castle = Object.Instantiate(Defines.CastlePrefab);
+        //var castlePos = new CubeIndex(0, 0).ToWorldPos(Defines.TileRadius);
+        ////castlePos.y = 0.1f;
+        //castle.AddComponent<NonUniformScaleProxy>().Value = new NonUniformScale { Value = new float3(2.5f, 2.5f, 2.5f) };
+        //castle.AddComponent<TranslationProxy>().Value = new Translation { Value = castlePos };
+        //castle.AddComponent<ConvertToEntity>().ConversionMode = ConvertToEntity.Mode.ConvertAndDestroy;
     }
 
+    public static void CreateResourceNode(EntityManager entityManager, Point2D point, int resourceId)
+    {
+        var entity = entityManager.CreateEntity();
+        var index = new CubeIndex(point.x, point.y, -point.x - point.y);
+        float3 pos = index.ToWorldPos(Defines.TileRadius);
+
+        entityManager.AddComponentData(entity, new NonUniformScale { Value = new float3(2.5f, 2.5f, 2.5f) });
+        entityManager.AddComponentData(entity, new LocalToWorld { });
+        entityManager.AddComponentData(entity, new Translation { Value = pos });
+        entityManager.AddComponentData(entity, new Rotation { Value = Quaternion.identity });
+        entityManager.AddSharedComponentData(entity, Defines.ResourceNodesPrefab[resourceId]);
+        entityManager.AddComponentData(entity, new ResourceNodeComponent
+        {
+            CubeIndex = index,
+            ResourceId = resourceId
+        });
+    }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     public static void InitializeWithScene()

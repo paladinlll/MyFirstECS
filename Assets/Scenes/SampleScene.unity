@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.49641287, b: 0.5748173, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -94,8 +94,8 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
     m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -412,27 +412,27 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 6090648099636821384, guid: b7dfec534979d5b4ea15fc5cec806a41,
     type: 3}
   BullerRenderer:
-    mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 3}
+    mesh: {fileID: 4300000, guid: fe512fe22ccb6d0419f94a02c4521547, type: 3}
     material: {fileID: 2100000, guid: 0ceb05d8b664c584884e876386b15f70, type: 2}
     subMesh: 0
     layer: 0
     castShadows: 0
     receiveShadows: 0
-  highlightMesh: {fileID: 4300000, guid: 008bf3cac50b1a14680ce9a91f33a9b0, type: 3}
+  highlightMesh: {fileID: 4300000, guid: a967d43d87a0d7e468908e6ff4645e71, type: 3}
   DefaultMaterial: {fileID: 2100000, guid: dd7af49cab6fdd043867db709c8e6367, type: 2}
   YellowMaterial: {fileID: 2100000, guid: 0ceb05d8b664c584884e876386b15f70, type: 2}
   orientation: 1
   tileCollections:
     meshes:
-    - {fileID: 4300000, guid: 1af34cea437b85f4fb64afebad6a0088, type: 3}
-    - {fileID: 4300000, guid: 34bf023270b401c4c863917f28f31faf, type: 3}
-    - {fileID: 4300000, guid: 5fd58ef91b4510e45bdae45dd50f67f1, type: 3}
-  TileMesh: {fileID: 4300000, guid: 008bf3cac50b1a14680ce9a91f33a9b0, type: 3}
-  TileMaterial: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
+    - {fileID: 4300000, guid: 7648119b4055248489399d8172e1ccbc, type: 3}
+    - {fileID: 4300000, guid: 31406d63b5b79594f8940797ad17d69c, type: 3}
+    - {fileID: 4300000, guid: 2c68b032072fadc4dae9aca37aebb546, type: 3}
+  TileMesh: {fileID: 4300000, guid: c5476dd4a4965c6439ee2a2dd2986197, type: 3}
+  TileMaterial: {fileID: 2100000, guid: 41680dad0f0243748b4e228f49a2e3c4, type: 2}
   TileRadius: 3
   CastlePrefab:
-    mesh: {fileID: 4300000, guid: 6a9ced45f71b0bf429415814d8d48101, type: 3}
-    material: {fileID: 2100000, guid: a16b7b85a356b7d469067849a165dcff, type: 2}
+    mesh: {fileID: 4300000, guid: 9ffb334c672fd3e44aad2a8cf409323e, type: 3}
+    material: {fileID: 2100000, guid: a3cd22eceea5e8548b10cdb5d9b49a25, type: 2}
     subMesh: 0
     layer: 0
     castShadows: 0
@@ -595,6 +595,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0

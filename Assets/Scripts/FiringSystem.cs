@@ -9,18 +9,14 @@ public class FiringSystem : JobComponentSystem
 {
     private EntityQuery _componentGroup;
 
-    protected override void OnCreateManager()
+    EntityCommandBufferSystem m_Barrier;
+
+    protected override void OnCreate()
     {
         _componentGroup = GetEntityQuery(ComponentType.ReadWrite<Firing>(),
                                            ComponentType.ReadWrite<LocalToWorld>(),
                                            ComponentType.ReadWrite<Rotation>());
         _componentGroup.SetFilterChanged(ComponentType.ReadWrite<Firing>());
-        base.OnCreateManager();
-    }
-    EntityCommandBufferSystem m_Barrier;
-
-    protected override void OnCreate()
-    {
         // Cache the BeginInitializationEntityCommandBufferSystem in a field, so we don't have to create it every frame
         m_Barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }

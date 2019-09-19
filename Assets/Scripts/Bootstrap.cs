@@ -164,20 +164,20 @@ public class Bootstrap : MonoBehaviour
 
     public static void CreateResourceNode(EntityManager entityManager, Point2D point, int resourceId)
     {
-        var entity = entityManager.CreateEntity();
-        var index = new CubeIndex(point.x, point.y, -point.x - point.y);
-        float3 pos = index.ToWorldPos(Defines.TileRadius);
+        //var entity = entityManager.CreateEntity();
+        //var index = new CubeIndex(point.x, point.y, -point.x - point.y);
+        //float3 pos = index.ToWorldPos(Defines.TileRadius);
 
-        entityManager.AddComponentData(entity, new NonUniformScale { Value = new float3(2.5f, 2.5f, 2.5f) });
-        entityManager.AddComponentData(entity, new LocalToWorld { });
-        entityManager.AddComponentData(entity, new Translation { Value = pos });
-        entityManager.AddComponentData(entity, new Rotation { Value = Quaternion.identity });
-        entityManager.AddSharedComponentData(entity, Defines.ResourceNodesPrefab[resourceId]);
-        entityManager.AddComponentData(entity, new ResourceNodeComponent
-        {
-            CubeIndex = index,
-            ResourceId = resourceId
-        });
+        //entityManager.AddComponentData(entity, new NonUniformScale { Value = new float3(2.5f, 2.5f, 2.5f) });
+        //entityManager.AddComponentData(entity, new LocalToWorld { });
+        //entityManager.AddComponentData(entity, new Translation { Value = pos });
+        //entityManager.AddComponentData(entity, new Rotation { Value = Quaternion.identity });
+        //entityManager.AddSharedComponentData(entity, Defines.ResourceNodesPrefab[resourceId]);
+        //entityManager.AddComponentData(entity, new ResourceNodeComponent
+        //{
+        //    CubeIndex = index,
+        //    ResourceId = resourceId
+        //});
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]

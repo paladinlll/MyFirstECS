@@ -20,8 +20,8 @@ public class HexMeshBuilderSystem : ComponentSystem
     [BurstCompile]
     private struct CopyTileJob : IJobForEachWithEntity<Translation, HexTileComponent>
     {
-        public NativeQueue<RenderData>.Concurrent terrain0NativeQueue;
-        public NativeQueue<RenderData>.Concurrent terrain1NativeQueue;
+        public NativeQueue<RenderData>.ParallelWriter terrain0NativeQueue;
+        public NativeQueue<RenderData>.ParallelWriter terrain1NativeQueue;
 
         public void Execute(Entity entity, int index, ref Translation translation, ref HexTileComponent hexTileComponent)
         {
@@ -87,8 +87,8 @@ public class HexMeshBuilderSystem : ComponentSystem
 
         CopyTileJob copyTileJob = new CopyTileJob
         {
-            terrain0NativeQueue = terrain0NativeQueue.ToConcurrent(),
-            terrain1NativeQueue = terrain1NativeQueue.ToConcurrent()
+            terrain0NativeQueue = terrain0NativeQueue.AsParallelWriter(),
+            terrain1NativeQueue = terrain1NativeQueue.AsParallelWriter()
         };
         JobHandle jobHandle = copyTileJob.Schedule(this);
         jobHandle.Complete();

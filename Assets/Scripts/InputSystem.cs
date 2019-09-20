@@ -45,9 +45,10 @@ public class InputSystem : ComponentSystem
 
         Entities.With(query).ForEach((Entity entity) =>
        {
+           float3 move = vertical * Vector3.forward + horizontal * Vector3.right;
            PostUpdateCommands.SetComponent(entity, new InputComponent
            {
-               Move = new float2(horizontal, vertical),
+               Move = new float2(move.x, move.z),
                ZoomSpeed = zoomSpeed,
                RotateSpeed = rotateSpeed
            });

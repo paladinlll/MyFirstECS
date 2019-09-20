@@ -2,7 +2,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-//[DisableAutoCreation]
+[DisableAutoCreation]
 public class CameraFollowSystem : ComponentSystem
 {
     private EntityQuery query;

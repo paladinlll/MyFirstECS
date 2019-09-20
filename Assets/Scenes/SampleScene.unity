@@ -409,8 +409,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08cf3204a2ab6834eb85ea6632f9ba13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerPrefab: {fileID: 6090648099636821384, guid: b7dfec534979d5b4ea15fc5cec806a41,
+  PlayerPrefab: {fileID: 5450819054332121951, guid: b5bbf2f087e754007a7d217a884bc208,
     type: 3}
+  CharacterMesh: {fileID: 4300008, guid: b5f71c859f9f9bf41badda8a4650082c, type: 3}
   BullerRenderer:
     mesh: {fileID: 4300000, guid: fe512fe22ccb6d0419f94a02c4521547, type: 3}
     material: {fileID: 2100000, guid: 0ceb05d8b664c584884e876386b15f70, type: 2}

@@ -13,6 +13,11 @@ public class Bootstrap : MonoBehaviour
     {
         var entityManager = World.Active.EntityManager;
         var player = Object.Instantiate(Defines.PlayerPrefab);
+        player.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh = Defines.CharacterMesh;
+        //player.AddComponent<NonUniformScaleProxy>().Value = new NonUniformScale { Value = new float3(2.5f, 2.5f, 2.5f) };
+        //player.AddComponent<TranslationProxy>().Value = new Translation { Value = castlePos };
+        //player.AddComponent<ConvertToEntity>().ConversionMode = ConvertToEntity.Mode.ConvertAndDestroy;
+
         var entity = player.GetComponent<GameObjectEntity>().Entity;
 
         entityManager.AddComponentData(entity, new InputComponent { Move = new float2(0, 0) });
@@ -25,15 +30,15 @@ public class Bootstrap : MonoBehaviour
         rigidBody.position = playerPos;
         rigidBody.velocity = Vector3.zero;
 
-        CreateTile(entityManager, new Point2D { x = 0, y = 0 }, 0);
-        //CreateMap(entityManager);
+        //CreateTile(entityManager, new Point2D { x = 0, y = 0 }, 0);
+        CreateMap(entityManager);
         for (int i = 1; i < 10; i++)
         {
-            CreateStrokeMap(entityManager, i, i % 2);
+            //CreateStrokeMap(entityManager, i, i % 2);
         }
-        CreateCastle(entityManager);
+        //CreateCastle(entityManager);
 
-        CreateResourceNode(entityManager, new Point2D { x = 2, y = 2 }, 0);
+        //CreateResourceNode(entityManager, new Point2D { x = 2, y = 2 }, 0);
     }
 
     public static void CreateStrokeMap(EntityManager entityManager, int Radius, int terrainTypeIndex)

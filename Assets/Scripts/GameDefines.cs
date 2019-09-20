@@ -4,6 +4,8 @@ using UnityEngine;
 public class GameDefines : MonoBehaviour
 {
     public GameObject PlayerPrefab;
+    public Mesh CharacterMesh;
+
     public RenderMesh BullerRenderer;
     public Mesh highlightMesh;
     //private RenderMesh _hexTerrain;
